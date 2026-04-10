@@ -1,53 +1,77 @@
 # LexAI — AI-Based Legal Document Analyzer & Summarizer
 
-![LexAI Banner](https://img.shields.io/badge/LexAI-AI--Based%20Legal%20Analyzer%20%26%20Summarizer-0f172a?style=for-the-badge&logo=scale&logoColor=white)
+![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=0B0F19)
+![Azure Functions](https://img.shields.io/badge/Azure-Functions-0062AD?style=for-the-badge&logo=microsoftazure&logoColor=white)
+![Azure AI](https://img.shields.io/badge/Azure-AI-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
+![GitHub Models GPT-4o](https://img.shields.io/badge/GitHub%20Models-GPT--4o-181717?style=for-the-badge&logo=github&logoColor=white)
 
-![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)
-![React](https://img.shields.io/badge/React-Vite%20Frontend-61DAFB?style=flat-square&logo=react&logoColor=0b0f19)
-![Azure](https://img.shields.io/badge/Azure-Cloud%20Services-0078D4?style=flat-square&logo=microsoftazure&logoColor=white)
-![GitHub Models](https://img.shields.io/badge/GitHub%20Models-GPT--4o-181717?style=flat-square&logo=github&logoColor=white)
-
-## Overview
-LexAI is an AI-powered SaaS web application for legal document analysis and summarization. It uses Azure cloud services to process uploaded documents, extract legal meaning, detect potential risks, and provide concise, context-aware outputs for faster legal review.
+LexAI is a full-stack AI-powered SaaS web application that analyzes legal documents using Microsoft Azure cloud services. Upload any legal PDF and get instant risk scoring, clause detection, AI summarization, and a contextual Q&A chatbot.
 
 ## Features
-- PDF upload with drag-and-drop support
-- AI-powered legal document summarization
-- Risk scoring from 0–100
-- Legal clause detection and highlighting
-- Document Q&A chat experience
-- Analysis history and retrieval
+
+- PDF drag-and-drop upload
+- AI Risk Scoring from 0-100 with a visual gauge
+- Legal Clause Detection with color-coded cards
+- Extractive Summary presented as a numbered timeline
+- Key Phrase Extraction for contract review
+- Document Q&A Chat powered by GPT-4o
+- Analysis History stored in Cosmos DB
 
 ## Tech Stack
-- Python 3.13
-- Azure Functions
-- Azure Blob Storage
-- Azure Document Intelligence
-- Azure AI Language
-- Azure Cosmos DB
-- GitHub Models (GPT-4o)
-- React + Vite
-- Tailwind CSS
 
-## Architecture
-LexAI follows a cloud-native client-server architecture:
+| Frontend | Backend | AI Services | Database |
+| --- | --- | --- | --- |
+| React, Vite, Tailwind CSS, Axios, React Hot Toast, Lucide React | Python 3.13, Azure Functions, Azure Blob Storage SDK, Azure Cosmos DB SDK, Azure AI Document Intelligence SDK, Azure AI Text Analytics SDK, OpenAI SDK for GitHub Models | Azure AI Document Intelligence, Azure AI Language, GitHub Models GPT-4o | Azure Cosmos DB |
 
-1. React + Vite frontend handles user authentication flow, PDF upload, and result presentation.
-2. Documents are uploaded to Azure Blob Storage.
-3. Azure Functions orchestrates ingestion, extraction, and AI workflows.
-4. Azure Document Intelligence parses structured text from legal PDFs.
-5. Azure AI Language performs clause analysis, entity extraction, and relevance logic.
-6. GitHub Models (GPT-4o) generates summaries and powers legal Q&A responses.
-7. Azure Cosmos DB stores analysis metadata, scores, and history.
+## Azure Services Used
+
+1. Azure Functions for serverless API endpoints.
+2. Azure Blob Storage for storing uploaded PDFs and extracted text.
+3. Azure AI Document Intelligence for PDF text extraction.
+4. Azure AI Language for key phrase extraction and summary support.
+5. Azure Cosmos DB for saving document analysis history and metadata.
+
+## Project Structure
+
+```text
+LexAi/
+├── backend/
+│   ├── function_app.py
+│   ├── host.json
+│   ├── local.settings.json
+│   └── requirements.txt
+├── frontend/
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── public/
+│   └── src/
+│       ├── App.jsx
+│       ├── index.css
+│       ├── main.jsx
+│       └── style.css
+└── README.md
+```
 
 ## Setup Instructions
-### 1) Clone the repository
+
+### Prerequisites
+
+- Python 3.13
+- Node.js 18+ or newer
+- Azure Functions Core Tools v4
+- An Azure subscription with the required AI and storage resources
+
+### 1. Clone the repository
+
 ```bash
 git clone <your-repo-url>
 cd LexAi
 ```
 
-### 2) Backend setup (Azure Functions)
+### 2. Backend setup
+
 ```bash
 cd backend
 python -m venv .venv
@@ -55,51 +79,71 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Create and configure `local.settings.json` with your Azure keys and connection strings:
+Create or update `local.settings.json` with these values:
+
 - `AzureWebJobsStorage`
-- `BLOB_CONNECTION_STRING`
+- `AZURE_STORAGE_CONNECTION_STRING`
+- `AZURE_STORAGE_CONTAINER_NAME`
 - `DOCUMENT_INTELLIGENCE_ENDPOINT`
 - `DOCUMENT_INTELLIGENCE_KEY`
 - `AZURE_LANGUAGE_ENDPOINT`
 - `AZURE_LANGUAGE_KEY`
+- `AZURE_OPENAI_KEY`
+- `AZURE_OPENAI_DEPLOYMENT_NAME`
 - `COSMOS_ENDPOINT`
 - `COSMOS_KEY`
-- `GITHUB_MODELS_API_KEY`
+- `COSMOS_DATABASE_NAME`
+- `COSMOS_CONTAINER_NAME`
 
 Run the backend locally:
+
 ```bash
 func start
 ```
 
-### 3) Frontend setup (React + Vite)
+### 3. Frontend setup
+
+Open a new terminal:
+
 ```bash
-cd ../frontend
+cd frontend
 npm install
 npm run dev
 ```
 
-### 4) Build for production
+If needed, set `VITE_API_BASE_URL` in the frontend environment to point to the local Functions endpoint.
+
+### 4. Production build
+
 ```bash
-# Frontend
 cd frontend
 npm run build
-
-# Backend is deployed through Azure Functions publish pipeline
 ```
 
 ## Screenshots
-> Add product screenshots here.
 
-- Upload page (drag-and-drop PDF)
-- Analysis dashboard (summary, risk score, clauses)
-- Q&A chat interface
-- History page
+Add screenshots below to showcase the project in your report or resume portfolio.
 
-## Future Improvements
-- Multi-document comparison
-- Contract template benchmarking
-- Role-based collaboration and review workflows
+### Upload Screen
+
+![Upload Screen](docs/screenshots/upload-page.png)
+
+### Results Dashboard
+
+![Results Dashboard](docs/screenshots/results-dashboard.png)
+
+### Chat Interface
+
+![Chat Interface](docs/screenshots/chat-interface.png)
+
+### History View
+
+![History View](docs/screenshots/history-view.png)
+
+## Summary
+
+LexAI demonstrates a complete Azure-based legal document analysis workflow with AI extraction, summarization, historical persistence, and conversational review.
 
 ---
 
-**Built with Azure Student Credits**
+Built with Azure for Students credits | College AI/ML Project

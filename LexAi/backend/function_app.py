@@ -1,7 +1,9 @@
 import json
 import logging
 import os
+import re
 import uuid
+from collections import Counter
 from datetime import datetime, timezone
 from urllib.parse import unquote, urlparse
 
@@ -175,6 +177,134 @@ def _extract_text_from_pdf(pdf_bytes: bytes) -> str:
 	return "\n".join(lines).strip()
 
 
+def _split_sentences(text: str) -> list[str]:
+	if not text:
+		return []
+	chunks = re.split(r"(?<=[.!?])\s+|\n+", text)
+	return [chunk.strip() for chunk in chunks if chunk and chunk.strip()]
+
+
+def _extractive_summary_fallback(text: str, max_sentences: int = 5) -> list[str]:
+	sentences = _split_sentences(text)
+	if not sentences:
+		return []
+
+	stopwords = {
+		"the",
+		"and",
+		"for",
+		"that",
+		"with",
+		"this",
+		"from",
+		"are",
+		"was",
+		"were",
+		"will",
+		"shall",
+		"may",
+		"can",
+		"not",
+		"but",
+		"any",
+		"all",
+		"into",
+		"out",
+		"our",
+		"their",
+		"your",
+		"its",
+		"has",
+		"have",
+		"had",
+		"been",
+		"being",
+		"such",
+		"here",
+		"there",
+		"where",
+		"which",
+		"what",
+		"when",
+		"who",
+		"whom",
+		"whose",
+		"about",
+		"under",
+		"over",
+		"between",
+		"within",
+		"without",
+	}
+
+	words = re.findall(r"[A-Za-z][A-Za-z0-9'-]*", text.lower())
+	frequencies = Counter(word for word in words if len(word) > 2 and word not in stopwords)
+	top_keywords = {word for word, _ in frequencies.most_common(40)}
+
+	scored: list[tuple[float, int, str]] = []
+	for index, sentence in enumerate(sentences):
+		tokens = re.findall(r"[A-Za-z][A-Za-z0-9'-]*", sentence.lower())
+		if not tokens:
+			continue
+
+		word_count = len(tokens)
+		keyword_hits = sum(1 for token in tokens if token in top_keywords)
+		keyword_density = keyword_hits / word_count
+		length_score = min(word_count, 40) / 40
+		score = (0.6 * keyword_density) + (0.4 * length_score)
+		scored.append((score, index, sentence))
+
+	if not scored:
+		return sentences[:max_sentences]
+
+	top = sorted(scored, key=lambda item: item[0], reverse=True)[:max_sentences]
+	top_sorted_by_position = sorted(top, key=lambda item: item[1])
+	return [sentence for _, _, sentence in top_sorted_by_position]
+
+
+def _extract_abstractive_summary_sentences(action_results) -> list[str]:
+	collected: list[str] = []
+
+	for document_result in action_results:
+		if hasattr(document_result, "abstractive_summarize_results"):
+			per_doc_action_results = document_result.abstractive_summarize_results or []
+		else:
+			try:
+				per_doc_action_results = list(document_result)
+			except TypeError:
+				per_doc_action_results = [document_result]
+
+		for action_result in per_doc_action_results:
+			if getattr(action_result, "is_error", False):
+				continue
+
+			summaries = getattr(action_result, "summaries", None)
+			if summaries:
+				for item in summaries:
+					text = getattr(item, "text", None)
+					if text:
+						collected.append(text.strip())
+
+			sentences = getattr(action_result, "sentences", None)
+			if sentences:
+				for item in sentences:
+					text = getattr(item, "text", None)
+					if text:
+						collected.append(text.strip())
+
+	# Preserve order while removing duplicates and empty strings.
+	seen: set[str] = set()
+	unique: list[str] = []
+	for sentence in collected:
+		normalized = sentence.strip()
+		if not normalized or normalized in seen:
+			continue
+		seen.add(normalized)
+		unique.append(normalized)
+
+	return unique
+
+
 def _run_language_analysis(text: str) -> tuple[list[str], list[str]]:
 	ta_client = _get_text_analytics_client()
 
@@ -189,20 +319,18 @@ def _run_language_analysis(text: str) -> tuple[list[str], list[str]]:
 	try:
 		from azure.ai.textanalytics import AbstractiveSummaryAction
 
-		actions = [AbstractiveSummaryAction()]
+		actions = [AbstractiveSummaryAction(max_sentence_count=5)]
 		poller = ta_client.begin_analyze_actions([text], actions=actions)
-
-		action_results = poller.result()
-		for document_results in action_results:
-			for action_result in document_results:
-				if not action_result.is_error:
-					summary_sentences = [sentence.text for sentence in action_result.sentences]
+		summary_sentences = _extract_abstractive_summary_sentences(poller.result())
 	except (ImportError, AttributeError):
-		# Keep summaries empty when abstractive summarization isn't available.
-		summary_sentences = []
+		# SDK lacks abstractive summarization support; use local extractive fallback.
+		summary_sentences = _extractive_summary_fallback(text)
 	except Exception:
-		logging.exception("Abstractive summarization failed; returning key phrases only.")
-		summary_sentences = []
+		logging.exception("Abstractive summarization failed; using extractive fallback.")
+		summary_sentences = _extractive_summary_fallback(text)
+
+	if not summary_sentences:
+		summary_sentences = _extractive_summary_fallback(text)
 
 	return summary_sentences, key_phrases
 
