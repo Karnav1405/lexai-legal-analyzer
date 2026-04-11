@@ -126,19 +126,19 @@ Add screenshots below to showcase the project in your report or resume portfolio
 
 ### Upload Screen
 
-![Upload Screen](docs/screenshots/upload-page.png)
+![Upload Screen](screenshots-LAi/LexAI-Upload.png.png)
 
 ### Results Dashboard
 
-![Results Dashboard](docs/screenshots/results-dashboard.png)
+![Results Dashboard](screenshots-LAi/results.png.png)
 
 ### Chat Interface
 
-![Chat Interface](docs/screenshots/chat-interface.png)
+![Chat Interface](screenshots-LAi/chat.png.png)
 
 ### History View
 
-![History View](docs/screenshots/history-view.png)
+![History View](screenshots-LAi/history.png.png)
 
 ## Summary
 

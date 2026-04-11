@@ -146,62 +146,51 @@ const splitSummarySteps = (summaryItems = []) => {
 };
 
 const renderInlineMarkdown = (text = "") => {
-  const chunks = String(text).split(/(\*\*[^*]+\*\*)/g);
+  const value = String(text || "");
+  const pieces = [];
+  const boldPattern = /\*\*([^*]+)\*\*/g;
+  let startIndex = 0;
+  let match;
 
-  return chunks.map((chunk, index) => {
-    const match = chunk.match(/^\*\*([^*]+)\*\*$/);
-    if (match) {
-      return <strong key={`bold-${index}`}>{match[1]}</strong>;
+  while ((match = boldPattern.exec(value)) !== null) {
+    const plainText = value.slice(startIndex, match.index).replace(/\*\*/g, "");
+    if (plainText) {
+      pieces.push(
+        <span key={`text-${pieces.length}`}>{plainText}</span>
+      );
     }
 
-    return <span key={`text-${index}`}>{chunk}</span>;
-  });
+    pieces.push(
+      <strong key={`bold-${pieces.length}`}>{match[1]}</strong>
+    );
+    startIndex = match.index + match[0].length;
+  }
+
+  const tailText = value.slice(startIndex).replace(/\*\*/g, "");
+  if (tailText) {
+    pieces.push(
+      <span key={`text-${pieces.length}`}>{tailText}</span>
+    );
+  }
+
+  return pieces.length > 0 ? pieces : <span>{value.replace(/\*\*/g, "")}</span>;
 };
 
 const renderMessageMarkdown = (text = "") => {
-  const lines = String(text).split("\n");
-  const blocks = [];
-  let listBuffer = [];
+  const lines = String(text || "").split("\n");
 
-  const flushList = () => {
-    if (listBuffer.length === 0) return;
+  return lines.map((rawLine, index) => {
+    const withoutHeading = rawLine.replace(/^\s*#{2,3}\s*/, "");
+    const listMatch = withoutHeading.match(/^\s*\d+\.\s+(.*)$/);
+    const renderedText = listMatch ? `• ${listMatch[1]}` : withoutHeading;
 
-    blocks.push(
-      <ol key={`list-${blocks.length}`} className="ml-5 list-decimal space-y-1">
-        {listBuffer.map((item, index) => (
-          <li key={`li-${index}`}>{renderInlineMarkdown(item)}</li>
-        ))}
-      </ol>
-    );
-    listBuffer = [];
-  };
-
-  lines.forEach((line, index) => {
-    const listMatch = line.match(/^\s*\d+\.\s+(.*)$/);
-
-    if (listMatch) {
-      listBuffer.push(listMatch[1]);
-      return;
-    }
-
-    flushList();
-
-    if (!line.trim()) {
-      blocks.push(<br key={`br-${index}`} />);
-      return;
-    }
-
-    blocks.push(
+    return (
       <span key={`line-${index}`}>
-        {renderInlineMarkdown(line)}
-        <br />
+        {renderInlineMarkdown(renderedText)}
+        {index < lines.length - 1 && <br />}
       </span>
     );
   });
-
-  flushList();
-
-  return blocks;
 };
 
 function Sidebar({ activePage, setActivePage }) {
@@ -753,6 +742,7 @@ export default function App() {
       text: question.trim(),
     };
 
+    setQuestion("");
     setChatMessages((prev) => [...prev, userMessage]);
     setIsAsking(true);
 
@@ -770,7 +760,6 @@ export default function App() {
           text: response?.data?.answer || "No answer returned.",
         },
       ]);
-      setQuestion("");
     } catch (error) {
       const message = error?.response?.data?.error || "Could not answer question.";
       toast.error(message);
