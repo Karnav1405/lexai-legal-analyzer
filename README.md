@@ -1,5 +1,12 @@
 # LexAI — AI-Based Legal Document Analyzer & Summarizer
 
+## 🚀 Live Demo
+
+- **Frontend URL:** https://yellow-pebble-081c12f00.7.azurestaticapps.net
+- **Backend API:** https://lexai-backend-az-huf8gvg8eyfsfzem.southeastasia-01.azurewebsites.net/api
+
+![Status Live](https://img.shields.io/badge/Status-Live-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)
+
 ![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=0B0F19)
 ![Azure Functions](https://img.shields.io/badge/Azure-Functions-0062AD?style=for-the-badge&logo=microsoftazure&logoColor=white)
@@ -8,10 +15,9 @@
 
 LexAI is a full-stack AI-powered SaaS web application that analyzes legal documents using Microsoft Azure cloud services. Upload any legal PDF and get instant risk scoring, clause detection, AI summarization, and a contextual Q&A chatbot.
 
-## Live Demo
+## Deployment
 
-- **Backend (Azure Functions):** https://lexai-backend-az-huf8gvg8eyfsfzem.southeastasia-01.azurewebsites.net/api
-- **Frontend (Hosted):** https://yellow-pebble-081c12f00.7.azurestaticapps.net
+LexAI is fully deployed on Azure. The frontend is hosted on Azure Static Web Apps, and the backend runs on Azure Functions using the Flex Consumption plan.
 
 ## Features
 
@@ -28,8 +34,6 @@ LexAI is a full-stack AI-powered SaaS web application that analyzes legal docume
 | Frontend | Backend | AI Services | Database |
 | --- | --- | --- | --- |
 | React, Vite, Tailwind CSS, Axios, React Hot Toast, Lucide React | Python 3.13, Azure Functions, Azure Blob Storage SDK, Azure Cosmos DB SDK, Azure AI Document Intelligence SDK, Azure AI Text Analytics SDK, OpenAI SDK for GitHub Models | Azure AI Document Intelligence, Azure AI Language, GitHub Models GPT-4o | Azure Cosmos DB |
-
-**Deployment:** Backend API deployed to https://lexai-backend-az-huf8gvg8eyfsfzem.southeastasia-01.azurewebsites.net/api — Frontend hosted at https://yellow-pebble-081c12f00.7.azurestaticapps.net
 
 ## Azure Services Used
 
