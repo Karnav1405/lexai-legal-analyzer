@@ -18,12 +18,46 @@ import {
   UploadCloud,
 } from "lucide-react";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+const API_BASE_URL_RAW = import.meta.env.VITE_API_BASE_URL || "";
+
+// Extract function key (code) from the base URL if present, and keep a clean base URL
+let API_BASE_URL = API_BASE_URL_RAW;
+let FUNCTION_KEY = null;
+
+try {
+  const parsed = new URL(API_BASE_URL_RAW);
+  FUNCTION_KEY = parsed.searchParams.get("code") || null;
+  if (FUNCTION_KEY) {
+    parsed.searchParams.delete("code");
+    // Use origin + pathname as the base URL (ensures no trailing ?)
+    API_BASE_URL = parsed.origin + parsed.pathname.replace(/\/+$/, "");
+  }
+} catch (e) {
+  // If it's not a full URL (or URL parsing failed), try a fallback split
+  const parts = API_BASE_URL_RAW.split("?");
+  if (parts.length > 1) {
+    API_BASE_URL = parts[0];
+    const params = new URLSearchParams(parts[1]);
+    FUNCTION_KEY = params.get("code") || null;
+  }
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 90000,
 });
+
+// If we found a function key, append it to every request as a default query param.
+if (FUNCTION_KEY) {
+  api.defaults.params = api.defaults.params || {};
+  api.defaults.params.code = FUNCTION_KEY;
+
+  // Also ensure per-request params are merged correctly using an interceptor
+  api.interceptors.request.use((config) => {
+    config.params = Object.assign({}, config.params || {}, { code: FUNCTION_KEY });
+    return config;
+  });
+}
 
 const navItems = [
   { id: "upload", label: "Upload", icon: UploadCloud },
