@@ -8,6 +8,11 @@
 
 LexAI is a full-stack AI-powered SaaS web application that analyzes legal documents using Microsoft Azure cloud services. Upload any legal PDF and get instant risk scoring, clause detection, AI summarization, and a contextual Q&A chatbot.
 
+## Live Demo
+
+- **Backend (Azure Functions):** https://lexai-backend-az-huf8gvg8eyfsfzem.southeastasia-01.azurewebsites.net/api
+- **Frontend (Hosted):** https://yellow-pebble-081c12f00.7.azurestaticapps.net
+
 ## Features
 
 - PDF drag-and-drop upload
@@ -23,6 +28,8 @@ LexAI is a full-stack AI-powered SaaS web application that analyzes legal docume
 | Frontend | Backend | AI Services | Database |
 | --- | --- | --- | --- |
 | React, Vite, Tailwind CSS, Axios, React Hot Toast, Lucide React | Python 3.13, Azure Functions, Azure Blob Storage SDK, Azure Cosmos DB SDK, Azure AI Document Intelligence SDK, Azure AI Text Analytics SDK, OpenAI SDK for GitHub Models | Azure AI Document Intelligence, Azure AI Language, GitHub Models GPT-4o | Azure Cosmos DB |
+
+**Deployment:** Backend API deployed to https://lexai-backend-az-huf8gvg8eyfsfzem.southeastasia-01.azurewebsites.net/api — Frontend hosted at https://yellow-pebble-081c12f00.7.azurestaticapps.net
 
 ## Azure Services Used
 
